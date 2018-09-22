@@ -15,8 +15,7 @@ data loading time
 #solutions:
     •	Based on the list size of each screen, each retrieval should get a little more images then it actual need of a screen.
     •	Remember the starting index and ending index, especially reaches the end of the available data.
-    
-     •Reason: can minimize the data loading time with only the data needed for the current screen
+    • Reason: can minimize the data loading time with only the data needed for the current screen
      
  
  
