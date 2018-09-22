@@ -1,21 +1,22 @@
 package com.presto.gallery;
 
-/**
- * Created by Yvonne on 2018-09-19.
- */
-
 public class Photo {
     public final String id;
     public final String title;
-    public int width;
-    public int height;
+    String width;
+    String height;
+    String dimemsion;
+    String smallImageUrl;
+    String fullImageUrl;
 
-    Photo(String id, String title) {
+
+    Photo(String id, String title,String dimemsion) {
         this.id = id;
         this.title = title;
+        this.dimemsion = dimemsion;
     }
-    private void setSize( int w, int h){
-        this.height = h;
-        this.width = w;
-    }
+
+
+
+
 }

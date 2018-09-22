@@ -9,24 +9,19 @@ import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
 
 
-
-public class GetPictures extends AsyncTask<String,Void,List> {
-
-
+public class GetSizes extends AsyncTask<String,Void,String[]> {
 
     @Override
-    protected List doInBackground(String ... strings) {
+    protected String[] doInBackground(String... strings) {
+        //return string array: square image url, original width, original height, original url
+        String photo_id = strings[0];
         String response;
-        String perpage = strings[0];
-        String page = strings[1];
         try {
             HttpRequestHandler http = new HttpRequestHandler();
             String url = String.format("https://api.flickr.com/services/rest/?api_key=949e987" +
-                    "78755d1982f537d56236bbb42&per_page=10&method=flickr.photos.getRecent&perpage=%s&page=%s",perpage,page);
+                    "78755d1982f537d56236bbb42&per_page=10&method=flickr.photos.GetSizes&photo_id=%s",photo_id);
             response = http.getHTTPData(url);
 
             //parse xml file
@@ -38,15 +33,13 @@ public class GetPictures extends AsyncTask<String,Void,List> {
             e.getStackTrace();
 
         }
+
+
         return null;
     }
 
-
-
-    private List parseXml(String s){
-        List<Photo> photos = new ArrayList<>();
-        List<Object> result = new ArrayList<>();
-        String currentPage = null,totalPages = null;
+    private String[] parseXml(String s){
+        String[] results = new String[4];
         try {
             boolean photo = false;
             XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
@@ -59,17 +52,20 @@ public class GetPictures extends AsyncTask<String,Void,List> {
                 if(eventType == XmlPullParser.START_TAG) {
                     if(xpp.getName().equals("rsp")){
                         if(xpp.next() == XmlPullParser.START_TAG){
-                            if(xpp.getName().equals("photos")){
-                                currentPage = xpp.getAttributeValue(null,"page");
-                                totalPages = xpp.getAttributeValue(null,"pages");
+                            if(xpp.getName().equals("sizes")){
+
                                 while (xpp.next() != XmlPullParser.END_TAG || photo) {
                                     if(xpp.getEventType() == XmlPullParser.START_TAG
-                                            && xpp.getName().equals("photo")){
-                                        String id = xpp.getAttributeValue(null, "id");
-                                        String title = xpp.getAttributeValue(null,"title");
-                                        String dimension =  xpp.getAttributeValue(null,"farm");
-                                        Photo photoObject = new Photo(id,title,dimension);
-                                        photos.add(photoObject);
+                                            && xpp.getName().equals("size")){
+                                        if(xpp.getAttributeValue(null, "label").equals("Square")){
+                                            results[0] = xpp.getAttributeValue(null, "source");
+                                        }
+                                        if(xpp.getAttributeValue(null, "label").equals("Original")){
+                                            results[1] = xpp.getAttributeValue(null, "width");
+                                            results[2] = xpp.getAttributeValue(null,"height");
+                                            results[3] = xpp.getAttributeValue(null,"source");
+                                        }
+
                                         photo = true;
                                     }else {
                                         photo = false;
@@ -81,10 +77,7 @@ public class GetPictures extends AsyncTask<String,Void,List> {
                 }
                 eventType = xpp.next();
             }
-            result.add(currentPage);
-            result.add(totalPages);
-            result.add(photos);
-            return result;
+            return results;
         } catch (XmlPullParserException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -93,4 +86,6 @@ public class GetPictures extends AsyncTask<String,Void,List> {
 
         return null;
     }
+
+
 }
